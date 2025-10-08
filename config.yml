@@ -8,7 +8,7 @@ schedule:
   # The cron is set in the GitHub Actions workflow; this is for reference only.
   note: "Daily via GitHub Actions cron; adjust in .github/workflows/pipeline.yml"
 openai:
-  transcription_model: "whisper-1"   # or "gpt-4o-mini-transcribe" if cheaper on your account
+  transcription_model: "gpt-4o-mini-transcribe"   # or "gpt-4o-mini-transcribe" if cheaper on your account
   summarize_model: "gpt-4o-mini"
   temperature: 0.2
 pipeline:
