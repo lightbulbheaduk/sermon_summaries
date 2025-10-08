@@ -57,7 +57,7 @@ def extract_key_info(transcript: str, user_prompt: str, model: str, temperature:
     if not isinstance(data["follow_on_questions"], list):
         data["follow_on_questions"] = [str(data["follow_on_questions"])]
     
-    bp = data.get("bible_passages", [])
+    bp = data.get("further_bible_passages", [])
     normalised = []
     for item in bp:
         if isinstance(item, dict):
@@ -69,7 +69,7 @@ def extract_key_info(transcript: str, user_prompt: str, model: str, temperature:
         
         if ref:
             normalised.append({"ref": ref, "rationale": rationale})
-    data["bible_passages"] = normalised
+    data["further_bible_passages"] = normalised
     
     if not isinstance(data["further_bible_passages"], list):
         data["further_bible_passages"] = [str(data["further_bible_passages"])]

@@ -51,7 +51,7 @@
     <section>
       <h3>Further reading</h3>
       <ul>
-      {% for p in episode.summary.bible_passages %} 
+      {% for p in episode.summary.further_bible_passages %} 
         <li><a href="{{ p.ref | bible_link }}" target="_blank" rel="noopener">{{ p.ref }}</a> — {{ p.rationale }}</li>
       {% endfor %} 
       </ul>
