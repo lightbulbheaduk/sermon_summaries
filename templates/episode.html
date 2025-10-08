@@ -4,6 +4,10 @@
   <h2>{{ episode.title }}</h2>
   <div class="muted">{{ episode.published }} • From feed: <a href="{{ episode.link }}">{{ episode.link }}</a></div>
 
+  {% if episode.image_url %}
+    <p><img class="hero" src="{{ episode.image_url }}" alt="Episode image"></p>
+  {% endif %}
+
   {% if episode.summary %}
     <section>
       <h3>Overall theme</h3>
@@ -12,7 +16,7 @@
 
     {% if episode.summary.quotes and episode.summary.quotes|length > 0 %}
     <section>
-      <h3>Key quotes</h3>
+      <h3>Key quotations</h3>
       <ul>
       {% for q in episode.summary.quotes %}
         <li>“{{ q }}”</li>
@@ -26,7 +30,7 @@
       <h3>Bible passages</h3>
       <ul>
       {% for ref in episode.summary.bible_passages %}
-        <li>{{ ref }}</li>
+        <li><a href="{{ ref | bible_link }}" target="_blank" rel="noopener">{{ ref }}</a></li>
       {% endfor %}
       </ul>
     </section>

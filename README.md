@@ -2,7 +2,7 @@
 
 Automated pipeline that:
 - Checks configured podcast RSS feeds for new episodes
-- Downloads audio, transcribes with OpenAI, summarizes and extracts key info
+- Downloads audio, transcribes with OpenAI, summarises and extracts key info
 - Publishes a static site to GitHub Pages with per-episode pages
 
 Tech: Python, GitHub Actions, GitHub Pages, OpenAI API.

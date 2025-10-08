@@ -2,6 +2,7 @@ import logging
 import os
 from datetime import datetime
 from typing import Any, Dict, List
+from urllib.parse import quote_plus
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .utils import ensure_dir, read_json, write_json
@@ -25,26 +26,35 @@ def load_episodes(episodes_dir: str) -> List[Dict[str, Any]]:
             "title": meta.get("title", ep_id),
             "published": meta.get("published", ""),
             "link": meta.get("link", ""),
+            "image_url": meta.get("image_url", None),
             "summary": summary,
             "transcript": transcript,
         })
     return items
 
 def publish_site(site_dir: str, episodes: List[Dict], site_title: str, site_description: str, base_url: str = ""):
-    """Render HTML pages into docs/."""
+    """Render HTML pages into docs/. Uses relative links to avoid 404s on GitHub Pages."""
     ensure_dir(site_dir)
     ensure_dir(os.path.join(site_dir, "episodes"))
+
+    # Ensure GitHub Pages does not try to run Jekyll
+    with open(os.path.join(site_dir, ".nojekyll"), "w", encoding="utf-8") as f:
+        f.write("")
 
     env = Environment(
         loader=FileSystemLoader("templates"),
         autoescape=select_autoescape()
     )
-    base_url = base_url.rstrip("/")
+
+    # Filter: turn a Bible passage string into a BibleGateway link (NIV)
+    def bible_link(ref: str) -> str:
+        return f"https://www.biblegateway.com/passage/?search={quote_plus(ref)}&version=NIV"
+    env.filters["bible_link"] = bible_link
+
     ctx_common = {
         "site_title": site_title,
         "site_description": site_description,
         "build_time": datetime.utcnow().isoformat() + "Z",
-        "base_url": base_url,
     }
 
     # Index

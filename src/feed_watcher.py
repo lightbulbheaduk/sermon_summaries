@@ -1,14 +1,62 @@
 import logging
 import time
-from typing import Dict, List
+from typing import Dict, List, Optional
 import feedparser
 from .utils import slugify
 
 log = logging.getLogger("feed_watcher")
 
+def _extract_image_from_entry(entry) -> Optional[str]:
+    # Try common fields in order of likelihood
+    # itunes:image
+    itunes_img = getattr(entry, "itunes_image", None)
+    if isinstance(itunes_img, dict) and itunes_img.get("href"):
+        return itunes_img["href"]
+    if isinstance(itunes_img, str):
+        return itunes_img
+
+    # media:thumbnail
+    media_thumb = getattr(entry, "media_thumbnail", None)
+    if isinstance(media_thumb, list) and media_thumb:
+        url = media_thumb[0].get("url")
+        if url:
+            return url
+
+    # media:content (where medium == image)
+    media_content = getattr(entry, "media_content", None)
+    if isinstance(media_content, list):
+        for m in media_content:
+            if m.get("medium") == "image" and m.get("url"):
+                return m["url"]
+
+    # image href (rare)
+    image = getattr(entry, "image", None)
+    if isinstance(image, dict) and image.get("href"):
+        return image["href"]
+
+    return None
+
+def _extract_image_from_feed(parsed) -> Optional[str]:
+    feed = getattr(parsed, "feed", None)
+    if not feed:
+        return None
+    # itunes:image at feed level
+    itunes_img = getattr(feed, "itunes_image", None)
+    if isinstance(itunes_img, dict) and itunes_img.get("href"):
+        return itunes_img["href"]
+    if isinstance(itunes_img, str):
+        return itunes_img
+    # feed image
+    image = getattr(feed, "image", None)
+    if isinstance(image, dict) and image.get("href"):
+        return image["href"]
+    return None
+
 def parse_feed(url: str) -> List[Dict]:
     """Parse RSS and return episode dicts with fields we need."""
     parsed = feedparser.parse(url)
+    feed_image_fallback = _extract_image_from_feed(parsed)
+
     episodes = []
     for entry in parsed.entries:
         guid = (
@@ -43,6 +91,8 @@ def parse_feed(url: str) -> List[Dict]:
         except Exception:
             ts = 0
 
+        image_url = _extract_image_from_entry(entry) or feed_image_fallback
+
         ep = {
             "guid": str(guid),
             "id": slugify(str(guid))[:80],
@@ -51,6 +101,7 @@ def parse_feed(url: str) -> List[Dict]:
             "published": published,
             "published_ts": ts,
             "audio_url": audio_url,
+            "image_url": image_url,
             "summary": getattr(entry, "summary", ""),
         }
         episodes.append(ep)
@@ -65,7 +116,6 @@ def find_new_episodes(all_feeds: List[str], processed_ids: List[str], per_feed_l
     new_eps: List[Dict] = []
     for feed in all_feeds:
         eps = parse_feed(feed)
-        # Sort newest first by timestamp (fallback to original order if ts == 0)
         eps.sort(key=lambda e: e.get("published_ts", 0), reverse=True)
         limited = eps[:max(0, int(per_feed_limit))]
         added = 0

@@ -4,14 +4,25 @@
 {% if episodes %}
   {% for ep in episodes %}
     <div class="episode">
-      <h3><a href="{{ base_url }}/episodes/{{ ep.id }}.html">{{ ep.title }}</a></h3>
-      <div class="muted">{{ ep.published }} • Source: <a href="{{ ep.link }}">Podcast page</a></div>
-      {% if ep.summary and ep.summary.overall_theme %}
-        <p><strong>Theme:</strong> {{ ep.summary.overall_theme }}</p>
+      {% if ep.image_url %}
+        <img class="thumb" src="{{ ep.image_url }}" alt="Episode image">
+      {% else %}
+        <div></div>
       {% endif %}
-      {% if ep.summary and ep.summary.bible_passages and ep.summary.bible_passages|length > 0 %}
-        <p><strong>Bible passages:</strong> {{ ep.summary.bible_passages | join(", ") }}</p>
-      {% endif %}
+      <div>
+        <h3><a href="episodes/{{ ep.id }}.html">{{ ep.title }}</a></h3>
+        <div class="muted">{{ ep.published }} • Source: <a href="{{ ep.link }}">Podcast page</a></div>
+        {% if ep.summary and ep.summary.overall_theme %}
+          <p><strong>Theme:</strong> {{ ep.summary.overall_theme }}</p>
+        {% endif %}
+        {% if ep.summary and ep.summary.bible_passages and ep.summary.bible_passages|length > 0 %}
+          <p><strong>Bible passages:</strong>
+            {% for ref in ep.summary.bible_passages %}
+              <a href="{{ ref | bible_link }}" target="_blank" rel="noopener">{{ ref }}</a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+          </p>
+        {% endif %}
+      </div>
     </div>
   {% endfor %}
 {% else %}
