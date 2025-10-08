@@ -38,7 +38,7 @@
 
     {% if episode.summary.follow_on_questions and episode.summary.follow_on_questions|length > 0 %}
     <section>
-      <h3>Bible passages</h3>
+      <h3>Questions you may wish to reflect on</h3>
       <ul>
       {% for f in episode.summary.follow_on_questions %}
         <li>{{ f }}</li>
