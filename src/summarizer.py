@@ -59,6 +59,6 @@ def extract_key_info(transcript: str, user_prompt: str, model: str, temperature:
     if not isinstance(data["further_bible_passages"], list):
         data["further_bible_passages"] = [str(data["further_bible_passages"])]
 
-    log.info("Extraction done: %d quotes, %d passages, %d questions, %d further_passages
+    log.info("Extraction done: %d quotes, %d passages, %d questions, %d further_passages",
              len(data["quotes"]), len(data["bible_passages"]), len(data["follow_on_questions"]), len(data["further_bible_passages"]))
     return data
