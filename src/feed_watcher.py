@@ -1,38 +1,81 @@
 import logging
 import time
+import re
 from typing import Dict, List, Optional
 import feedparser
 from .utils import slugify
 
 log = logging.getLogger("feed_watcher")
 
+IMG_TAG_RE = re.compile(r'<img[^>]+src=["\']([^"\']+)["\']', re.IGNORECASE)
+
+def _first_img_from_html(html: Optional[str]) -> Optional[str]:
+    if not html:
+        return None
+    m = IMG_TAG_RE.search(html)
+    return m.group(1) if m else None
+
 def _extract_image_from_entry(entry) -> Optional[str]:
-    # Try common fields in order of likelihood
-    # itunes:image
+    # 1) itunes:image (can be dict, list, or string)
     itunes_img = getattr(entry, "itunes_image", None)
     if isinstance(itunes_img, dict) and itunes_img.get("href"):
         return itunes_img["href"]
-    if isinstance(itunes_img, str):
-        return itunes_img
+    if isinstance(itunes_img, list) and itunes_img:
+        # Some feeds provide a list of dicts
+        href = itunes_img[0].get("href") if isinstance(itunes_img[0], dict) else None
+        if href:
+            return href
+    if isinstance(itunes_img, str) and itunes_img.strip():
+        return itunes_img.strip()
 
-    # media:thumbnail
+    # 2) feedparser sometimes maps image differently
+    image = getattr(entry, "image", None)
+    if isinstance(image, dict):
+        # Common keys: href, url
+        if image.get("href"):
+            return image["href"]
+        if image.get("url"):
+            return image["url"]
+    if isinstance(image, str) and image.strip():
+        return image.strip()
+
+    # 3) media:thumbnail
     media_thumb = getattr(entry, "media_thumbnail", None)
     if isinstance(media_thumb, list) and media_thumb:
         url = media_thumb[0].get("url")
         if url:
             return url
 
-    # media:content (where medium == image)
+    # 4) media:content (prefer explicit images)
     media_content = getattr(entry, "media_content", None)
     if isinstance(media_content, list):
+        # Prefer type image/* or medium image
         for m in media_content:
-            if m.get("medium") == "image" and m.get("url"):
+            if (m.get("medium") == "image" or str(m.get("type", "")).startswith("image")) and m.get("url"):
                 return m["url"]
 
-    # image href (rare)
-    image = getattr(entry, "image", None)
-    if isinstance(image, dict) and image.get("href"):
-        return image["href"]
+    # 5) links that are images
+    for lnk in getattr(entry, "links", []):
+        if (lnk.get("rel") == "image" or str(lnk.get("type", "")).startswith("image")) and lnk.get("href"):
+            return lnk["href"]
+
+    # 6) Try to parse first <img> from summary/content HTML
+    summary = getattr(entry, "summary", None)
+    if isinstance(summary, str):
+        url = _first_img_from_html(summary)
+        if url:
+            return url
+    summary_detail = getattr(entry, "summary_detail", None)
+    if isinstance(summary_detail, dict):
+        url = _first_img_from_html(summary_detail.get("value"))
+        if url:
+            return url
+    content = getattr(entry, "content", None)
+    if isinstance(content, list) and content:
+        val = content[0].get("value")
+        url = _first_img_from_html(val)
+        if url:
+            return url
 
     return None
 
@@ -44,12 +87,27 @@ def _extract_image_from_feed(parsed) -> Optional[str]:
     itunes_img = getattr(feed, "itunes_image", None)
     if isinstance(itunes_img, dict) and itunes_img.get("href"):
         return itunes_img["href"]
-    if isinstance(itunes_img, str):
-        return itunes_img
+    if isinstance(itunes_img, list) and itunes_img:
+        href = itunes_img[0].get("href") if isinstance(itunes_img[0], dict) else None
+        if href:
+            return href
+    if isinstance(itunes_img, str) and itunes_img.strip():
+        return itunes_img.strip()
     # feed image
     image = getattr(feed, "image", None)
-    if isinstance(image, dict) and image.get("href"):
-        return image["href"]
+    if isinstance(image, dict):
+        if image.get("href"):
+            return image["href"]
+        if image.get("url"):
+            return image["url"]
+    if isinstance(image, str) and image.strip():
+        return image.strip()
+    # Try HTML in feed subtitle/description
+    subtitle = getattr(feed, "subtitle", None)
+    if isinstance(subtitle, str):
+        u = _first_img_from_html(subtitle)
+        if u:
+            return u
     return None
 
 def parse_feed(url: str) -> List[Dict]:
@@ -76,7 +134,7 @@ def parse_feed(url: str) -> List[Dict]:
                 break
         if not audio_url:
             for lnk in getattr(entry, "links", []):
-                if lnk.get("type", "").startswith("audio"):
+                if str(lnk.get("type", "")).startswith("audio") and lnk.get("href"):
                     audio_url = lnk.get("href")
                     break
 
@@ -92,6 +150,9 @@ def parse_feed(url: str) -> List[Dict]:
             ts = 0
 
         image_url = _extract_image_from_entry(entry) or feed_image_fallback
+        if not image_url:
+            log.debug("No image found for entry titled '%s'. Available keys: %s",
+                      getattr(entry, "title", "Untitled"), list(entry.keys()))
 
         ep = {
             "guid": str(guid),

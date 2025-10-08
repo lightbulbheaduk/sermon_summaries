@@ -22,13 +22,14 @@ def load_episodes(episodes_dir: str) -> List[Dict[str, Any]]:
         summary = read_json(os.path.join(ep_path, "summary.json"), {})
         transcript = read_json(os.path.join(ep_path, "transcript.json"), {}).get("text", "")
         items.append({
-            "id": ep_id,
-            "title": meta.get("title", ep_id),
-            "published": meta.get("published", ""),
-            "link": meta.get("link", ""),
-            "image_url": meta.get("image_url", None),
-            "summary": summary,
-            "transcript": transcript,
+        "id": ep_id,
+        "title": meta.get("title", ep_id),
+        "published": meta.get("published", ""),
+        "published_ts": meta.get("published_ts", 0),  # add this
+        "link": meta.get("link", ""),
+        "image_url": meta.get("image_url", None),
+        "summary": summary,
+        "transcript": transcript,
         })
     return items
 

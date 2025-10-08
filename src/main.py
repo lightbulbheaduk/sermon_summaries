@@ -61,12 +61,14 @@ def main():
 
         # Save minimal meta
         meta = {
-            "id": ep_id,
-            "guid": ep["guid"],
-            "title": ep["title"],
-            "link": ep["link"],
-            "published": ep["published"],
-            "feed_audio_url": ep["audio_url"],
+        "id": ep_id,
+        "guid": ep["guid"],
+        "title": ep["title"],
+        "link": ep["link"],
+        "published": ep["published"],
+        "published_ts": ep.get("published_ts", 0),  # add this line
+        "feed_audio_url": ep["audio_url"],
+        "image_url": ep.get("image_url"),          # keep image if you’re capturing it
         }
         write_json(os.path.join(ep_dir, "meta.json"), meta)
 
@@ -122,7 +124,7 @@ def main():
     # Rebuild site
     episodes = load_episodes(episodes_dir)
     # Sort newest first by published if available
-    episodes.sort(key=lambda e: e.get("published", ""), reverse=True)
+    episodes.sort(key=lambda e: (e.get("published_ts") or 0, e.get("published") or ""), reverse=True)
     publish_site(site_dir, episodes, cfg["site"]["title"], cfg["site"]["description"], cfg["site"].get("base_url", ""))
 
     log.info("Pipeline complete.")
