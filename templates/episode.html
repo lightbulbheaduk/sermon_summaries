@@ -51,9 +51,9 @@
     <section>
       <h3>Further reading</h3>
       <ul>
-      {% for ref in episode.summary.further_bible_passages %}
-        <li><a href="{{ ref | bible_link }}" target="_blank" rel="noopener">{{ ref }}</a></li>
-      {% endfor %}
+      {% for p in episode.summary.bible_passages %} 
+        <li><a href="{{ p.ref | bible_link }}" target="_blank" rel="noopener">{{ p.ref }}</a> — {{ p.rationale }}</li>
+      {% endfor %} 
       </ul>
     </section>
     {% endif %}
@@ -61,7 +61,7 @@
 
   <details>
     <summary>View transcript (long)</summary>
-    <pre>{{ episode.transcript|default("") }}</pre>
+    <pre class="transcript">{{ episode.transcript|default("") }}</pre>
   </details>
 </article>
 {% endblock %}
