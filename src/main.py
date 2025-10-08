@@ -38,7 +38,8 @@ def main():
 
     # Find new episodes
     feeds = cfg["feeds"]
-    new_eps = find_new_episodes(feeds, processed_ids)
+    per_feed_limit = int(cfg["pipeline"].get("per_feed_limit", 3))
+    new_eps = find_new_episodes(feeds, processed_ids, per_feed_limit=per_feed_limit)
     log.info("New episodes to process: %d", len(new_eps))
 
     if not new_eps:

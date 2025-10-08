@@ -15,7 +15,8 @@ pipeline:
   max_download_mb: 300
   segment_seconds: 600   # chunk audio into 10 min segments
   language_hint: "en"    # optional, pass None to omit
-  max_quotes: 5
+  max_quotes: 5 # only pull out 5 quotes per episode
+  per_feed_limit: 3 # only consider the newest 3 episodes per feed
 storage:
   # Where outputs go
   data_dir: "data"
