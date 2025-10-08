@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<article>
+  <h2>{{ episode.title }}</h2>
+  <div class="muted">{{ episode.published }} • From feed: <a href="{{ episode.link }}">{{ episode.link }}</a></div>
+
+  {% if episode.summary %}
+    <section>
+      <h3>Overall theme</h3>
+      <p>{{ episode.summary.overall_theme }}</p>
+    </section>
+
+    {% if episode.summary.quotes and episode.summary.quotes|length > 0 %}
+    <section>
+      <h3>Key quotes</h3>
+      <ul>
+      {% for q in episode.summary.quotes %}
+        <li>“{{ q }}”</li>
+      {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    {% if episode.summary.bible_passages and episode.summary.bible_passages|length > 0 %}
+    <section>
+      <h3>Bible passages</h3>
+      <ul>
+      {% for ref in episode.summary.bible_passages %}
+        <li>{{ ref }}</li>
+      {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  {% endif %}
+
+  <details>
+    <summary>View transcript (long)</summary>
+    <pre>{{ episode.transcript|default("") }}</pre>
+  </details>
+</article>
+{% endblock %}

@@ -1,0 +1,24 @@
+site:
+  title: "Podcast Summaries"
+  description: "Daily summaries and key info from configured podcast feeds."
+  base_url: ""  # optional, e.g., "https://yourname.github.io/podcast-pipeline"
+feeds:
+  - "https://rss.com/podcasts/gloucestervineyard/"
+schedule:
+  # The cron is set in the GitHub Actions workflow; this is for reference only.
+  note: "Daily via GitHub Actions cron; adjust in .github/workflows/pipeline.yml"
+openai:
+  transcription_model: "whisper-1"   # or "gpt-4o-mini-transcribe" if cheaper on your account
+  summarize_model: "gpt-4o-mini"
+  temperature: 0.2
+pipeline:
+  max_download_mb: 300
+  segment_seconds: 600   # chunk audio into 10 min segments
+  language_hint: "en"    # optional, pass None to omit
+  max_quotes: 5
+storage:
+  # Where outputs go
+  data_dir: "data"
+  episodes_dir: "data/episodes"
+  state_file: "data/state.json"
+  site_dir: "docs"

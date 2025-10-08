@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Episodes</h2>
+{% if episodes %}
+  {% for ep in episodes %}
+    <div class="episode">
+      <h3><a href="{{ base_url }}/episodes/{{ ep.id }}.html">{{ ep.title }}</a></h3>
+      <div class="muted">{{ ep.published }} • Source: <a href="{{ ep.link }}">Podcast page</a></div>
+      {% if ep.summary and ep.summary.overall_theme %}
+        <p><strong>Theme:</strong> {{ ep.summary.overall_theme }}</p>
+      {% endif %}
+      {% if ep.summary and ep.summary.bible_passages and ep.summary.bible_passages|length > 0 %}
+        <p><strong>Bible passages:</strong> {{ ep.summary.bible_passages | join(", ") }}</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% else %}
+  <p>No episodes processed yet.</p>
+{% endif %}
+{% endblock %}
