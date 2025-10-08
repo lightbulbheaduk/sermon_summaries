@@ -4,6 +4,7 @@ site:
   base_url: ""  # optional, e.g., "https://yourname.github.io/podcast-pipeline"
 feeds:
   - "https://media.rss.com/gloucestervineyard/feed.xml"
+  - "https://www.stpaulstephenglos.org.uk/join-in/sermon-podcast/"
 schedule:
   # The cron is set in the GitHub Actions workflow; this is for reference only.
   note: "Daily via GitHub Actions cron; adjust in .github/workflows/pipeline.yml"
