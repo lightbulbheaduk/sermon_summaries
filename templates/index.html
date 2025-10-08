@@ -15,13 +15,6 @@
         {% if ep.summary and ep.summary.overall_theme %}
           <p><strong>Theme:</strong> {{ ep.summary.overall_theme }}</p>
         {% endif %}
-        {% if ep.summary and ep.summary.bible_passages and ep.summary.bible_passages|length > 0 %}
-          <p><strong>Bible passages:</strong>
-            {% for ref in ep.summary.bible_passages %}
-              <a href="{{ ref | bible_link }}" target="_blank" rel="noopener">{{ ref }}</a>{% if not loop.last %}, {% endif %}
-            {% endfor %}
-          </p>
-        {% endif %}
       </div>
     </div>
   {% endfor %}

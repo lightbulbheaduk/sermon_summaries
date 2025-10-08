@@ -48,11 +48,17 @@ def extract_key_info(transcript: str, user_prompt: str, model: str, temperature:
     data.setdefault("overall_theme", "")
     data.setdefault("quotes", [])
     data.setdefault("bible_passages", [])
+    data.setdefault("follow_on_questions", [])
+    data.setdefault("further_bible_passages", [])
     if not isinstance(data["quotes"], list):
         data["quotes"] = [str(data["quotes"])]
     if not isinstance(data["bible_passages"], list):
         data["bible_passages"] = [str(data["bible_passages"])]
+    if not isinstance(data["follow_on_questions"], list):
+        data["follow_on_questions"] = [str(data["follow_on_questions"])]
+    if not isinstance(data["further_bible_passages"], list):
+        data["further_bible_passages"] = [str(data["further_bible_passages"])]
 
-    log.info("Extraction done: %d quotes, %d passages",
-             len(data["quotes"]), len(data["bible_passages"]))
+    log.info("Extraction done: %d quotes, %d passages, %d questions, %d further_passages
+             len(data["quotes"]), len(data["bible_passages"]), len(data["follow_on_questions"]), len(data["further_bible_passages"]))
     return data
