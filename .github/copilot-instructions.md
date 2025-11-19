@@ -45,6 +45,16 @@ Search tips and examples
 - To find how episodes are loaded: inspect `src/publisher.py::load_episodes` and `templates/episode.html` (fields used there reflect JSON keys).
 - To see the prompt and strict output expectations: open `prompt.txt` (describes required JSON keys and British English spellings).
 
+CI / GitHub Actions
+- Workflow: `.github/workflows/pipeline.yml` — runs daily via cron and supports manual dispatch.
+- What it does: checks out the repo, sets up Python, installs `ffmpeg`, installs dependencies, runs the pipeline (`python -m src.main`), then commits `data/` and `docs/` back to the repository when changes appear.
+- Important details:
+  - The runner requires a GitHub Secret `OPENAI_API_KEY` (exposed as `secrets.OPENAI_API_KEY`).
+  - The workflow sets `permissions: contents: write` to allow committing output files.
+  - Commits from Actions use the message `Update data and site [skip ci]` to avoid re-triggering the job.
+  - Because the workflow commits, avoid pushing incompatible schema changes without local testing — the action may push site files that break templates if schema and templates disagree.
+
+
 If you change the summariser JSON format
 - Update `src/summarizer.py` normalization first, then `templates/` and `src/publisher.py::load_episodes` to avoid runtime template errors.
 
