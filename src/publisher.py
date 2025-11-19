@@ -31,6 +31,11 @@ def load_episodes(episodes_dir: str) -> List[Dict[str, Any]]:
         "summary": summary,
         "transcript": transcript,
         })
+    # Ensure episodes are returned sorted by published date (newest first).
+    # Some callers (or manual uses of `publisher.load_episodes`) expect a
+    # newest-first ordering; `src/main.py` also sorts before publishing but
+    # normalising sort behaviour here avoids duplicated sorting logic.
+    items.sort(key=lambda e: (e.get("published_ts") or 0, e.get("published") or ""), reverse=True)
     return items
 
 def publish_site(site_dir: str, episodes: List[Dict], site_title: str, site_description: str, base_url: str = ""):
