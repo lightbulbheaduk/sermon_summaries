@@ -4,8 +4,12 @@ import shutil
 from pathlib import Path
 import tempfile
 import time
+import sys
 
 import pytest
+
+# Ensure project root is on sys.path so `from src...` imports work
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.utils import write_json, slugify
 from src.publisher import load_episodes
