@@ -138,6 +138,16 @@ def parse_feed(url: str) -> List[Dict]:
                     audio_url = lnk.get("href")
                     break
 
+        # If media:content exists (common in YouTube RSS) prefer it for video URL
+        media_content = getattr(entry, "media_content", None)
+        if not audio_url and isinstance(media_content, list) and media_content:
+            # media_content items may include video URLs (youtube watch URLs)
+            for mc in media_content:
+                url = mc.get("url")
+                if url:
+                    audio_url = url
+                    break
+
         # Publish date handling (best-effort)
         published = getattr(entry, "published", "") or getattr(entry, "updated", "")
         ts = 0
@@ -149,15 +159,26 @@ def parse_feed(url: str) -> List[Dict]:
         except Exception:
             ts = 0
 
-        image_url = _extract_image_from_entry(entry) or feed_image_fallback
+        # Prefer media:thumbnail when present (YouTube RSS provides media:thumbnail)
+        image_url = None
+        media_thumb = getattr(entry, "media_thumbnail", None)
+        if isinstance(media_thumb, list) and media_thumb:
+            image_url = media_thumb[0].get("url")
+        image_url = image_url or _extract_image_from_entry(entry) or feed_image_fallback
         if not image_url:
             log.debug("No image found for entry titled '%s'. Available keys: %s",
                       getattr(entry, "title", "Untitled"), list(entry.keys()))
 
+        # Prefer media:title if present (YouTube RSS includes media:title)
+        media_title = getattr(entry, "media_title", None)
+        title = getattr(entry, "title", "Untitled Episode")
+        if isinstance(media_title, str) and media_title.strip():
+            title = media_title
+
         ep = {
             "guid": str(guid),
             "id": slugify(str(guid))[:80],
-            "title": getattr(entry, "title", "Untitled Episode"),
+            "title": title,
             "link": getattr(entry, "link", ""),
             "published": published,
             "published_ts": ts,

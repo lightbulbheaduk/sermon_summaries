@@ -5,6 +5,19 @@ site:
 feeds:
   - "https://media.rss.com/gloucestervineyard/feed.xml"
   - "https://stmarysb.org.uk/Media/rss.xml"
+# YouTube feeds: provide RSS feed URLs in the format
+# https://www.youtube.com/feeds/videos.xml?channel_id=<CHANNEL_ID>
+#
+# How to find the channel ID for a YouTube channel (if the channel uses the
+# newer handle format like youtube.com/@channelname):
+# 1. Open the channel page in your browser (e.g. https://www.youtube.com/@channelname).
+# 2. Click the "About" tab (or the three-dot / "More" button) on the channel page.
+# 3. In the modal that appears click the "Share" button and choose "Copy channel ID".
+# 4. The channel ID will be in the form `UC...` (starts with UC). Use that value in the
+#    RSS feed URL below, e.g.:
+#      https://www.youtube.com/feeds/videos.xml?channel_id=UCxxxxxxxxxxxxxxxxxxxxxx
+youtube-feeds: 
+  - "https://www.youtube.com/feeds/videos.xml?channel_id=UCV9Ir2j-d6IO-r7C4xjSdKg"  # Example channel ID; replace as needed
 schedule:
   # The cron is set in the GitHub Actions workflow; this is for reference only.
   note: "Daily via GitHub Actions cron; adjust in .github/workflows/pipeline.yml"

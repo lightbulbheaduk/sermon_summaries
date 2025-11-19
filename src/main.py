@@ -37,7 +37,19 @@ def main():
     processed_ids: List[str] = state.get("processed_ids", [])
 
     # Find new episodes
-    feeds = cfg["feeds"]
+    feeds = list(cfg.get("feeds", []))
+    # Also include any explicit YouTube RSS feed URLs provided under `youtube-feeds`.
+    # The config guidance asks users to provide feeds in the form:
+    #   https://www.youtube.com/feeds/videos.xml?channel_id=<CHANNEL_ID>
+    yfeeds = cfg.get("youtube-feeds", []) or []
+    if isinstance(yfeeds, list):
+        for y in yfeeds:
+            if y and y not in feeds:
+                feeds.append(y)
+    elif isinstance(yfeeds, str) and yfeeds:
+        if yfeeds not in feeds:
+            feeds.append(yfeeds)
+
     per_feed_limit = int(cfg["pipeline"].get("per_feed_limit", 3))
     new_eps = find_new_episodes(feeds, processed_ids, per_feed_limit=per_feed_limit)
     log.info("New episodes to process: %d", len(new_eps))
